@@ -77,12 +77,9 @@ Email: bayul769@gmail.com
 GitHub: @bayuish
 
 
----
-
-```markdown
 ## 📸 Screenshot
 
-| Login Page        
+   
 
 <img width="500" alt="Screenshot 2025-03-23 at 02 28 16" src="https://github.com/user-attachments/assets/738cce1d-2600-4d78-88ef-1bd8707bbd58" />
 
