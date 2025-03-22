@@ -150,7 +150,7 @@ class _ImageBuilderScreenState extends State<ImageBuilderScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 4), // ganti sesuai posisi nav
+      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 3), // ganti sesuai posisi nav
     );
   }
 }

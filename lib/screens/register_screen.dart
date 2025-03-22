@@ -52,7 +52,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     try {
-      // 1. Register ke Supabase Auth
       final authRes = await Supabase.instance.client.auth.signUp(
         email: email,
         password: password,
@@ -61,7 +60,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final userId = authRes.user?.id;
       if (userId == null) throw Exception("Gagal registrasi.");
 
-      // 2. Upload gambar ke Supabase Storage
       final fileExt = extension(_imageName ?? 'image.png');
       final fileName = '${DateTime.now().millisecondsSinceEpoch}$fileExt';
 
@@ -73,7 +71,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           .from('avatars')
           .getPublicUrl('public/$fileName');
 
-      // 3. Simpan data user ke tabel profiles
       await Supabase.instance.client.from('profiles').insert({
         'id': userId,
         'name': name,
@@ -105,18 +102,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     )
         : const CircleAvatar(
       radius: 50,
-      backgroundColor: Colors.grey,
-      child: Icon(Icons.camera_alt, size: 40),
+      backgroundColor: Colors.white,
+      child: Icon(Icons.camera_alt, size: 40, color: Colors.grey),
     );
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFE8F0FA),
       appBar: AppBar(
-        title: const Text("Register"),
-        backgroundColor: Colors.green,
+        title: const Text("Daftar Akun", style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF256DFF),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
             const SizedBox(height: 20),
@@ -125,20 +123,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
             _buildTextField(_nameController, "Full Name"),
             _buildTextField(_emailController, "Email"),
             _buildTextField(_passwordController, "Password", obscure: true),
-            _buildTextField(_confirmPasswordController, "Confirmation Password", obscure: true),
-            const SizedBox(height: 20),
+            _buildTextField(_confirmPasswordController, "Konfirmasi Password", obscure: true),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => _register(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  backgroundColor: const Color(0xFF256DFF),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text("Register", style: TextStyle(fontSize: 18)),
+                child: const Text("Daftar", style: TextStyle(fontSize: 18, color: Colors.white)),
               ),
             ),
           ],
@@ -147,21 +143,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
-      {bool obscure = false}) {
+  Widget _buildTextField(TextEditingController controller, String label, {bool obscure = false}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: TextField(
         controller: controller,
         obscureText: obscure,
         decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.green[100],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(5),
-            borderSide: BorderSide.none,
-          ),
           labelText: label,
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
     );

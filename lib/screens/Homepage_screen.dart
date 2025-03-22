@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/custom_bottom_navbar.dart';
+import 'login_screen.dart';
 
 class HomepageScreen extends StatefulWidget {
   const HomepageScreen({super.key});
@@ -12,6 +13,7 @@ class HomepageScreen extends StatefulWidget {
 class _HomepageScreenState extends State<HomepageScreen> {
   String? avatarUrl;
   String? userName;
+  String? userEmail;
   int selectedIndex = 0;
 
   final List<Map<String, String>> products = [
@@ -43,13 +45,14 @@ class _HomepageScreenState extends State<HomepageScreen> {
     if (user != null) {
       final response = await Supabase.instance.client
           .from('profiles')
-          .select('avatar_url, name')
+          .select('avatar_url, name, email')
           .eq('id', user.id)
           .single();
 
       setState(() {
         avatarUrl = response['avatar_url'] as String?;
         userName = response['name'] as String?;
+        userEmail = response['email'] as String?;
       });
     }
   }
@@ -60,12 +63,47 @@ class _HomepageScreenState extends State<HomepageScreen> {
     });
   }
 
+  void _signOut() async {
+    await Supabase.instance.client.auth.signOut();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+            (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final selected = products[selectedIndex];
 
     return Scaffold(
       backgroundColor: const Color(0xFFE8F0FA),
+      drawer: Drawer(
+        child: ListView(
+          padding: const EdgeInsets.all(0),
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text(userName ?? 'Guest'),
+              accountEmail: Text(userEmail ?? ''),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl!) : null,
+                backgroundColor: Colors.grey[300],
+                child: avatarUrl == null
+                    ? const Icon(Icons.person, color: Colors.white)
+                    : null,
+              ),
+              decoration: const BoxDecoration(color: Color(0xFF256DFF)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text("Sign Out"),
+              onTap: _signOut,
+            ),
+          ],
+        ),
+      ),
       body: Stack(
         children: [
           Align(
@@ -89,10 +127,18 @@ class _HomepageScreenState extends State<HomepageScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Header Row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _iconButton(Icons.menu),
+                      Builder(
+                        builder: (context) {
+                          return GestureDetector(
+                            onTap: () => Scaffold.of(context).openDrawer(),
+                            child: _iconButton(Icons.menu),
+                          );
+                        },
+                      ),
                       Column(
                         children: [
                           _profileAvatar(),
@@ -116,7 +162,6 @@ class _HomepageScreenState extends State<HomepageScreen> {
                   const Text("Featured", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
                   const Text("Products", style: TextStyle(fontSize: 26, fontWeight: FontWeight.w300)),
                   const SizedBox(height: 20),
-
                   Row(
                     children: [
                       _categoryIcon(Icons.calculate_rounded, 0),
@@ -127,7 +172,6 @@ class _HomepageScreenState extends State<HomepageScreen> {
                     ],
                   ),
                   const SizedBox(height: 30),
-
                   Center(child: _productCard(selected)),
                 ],
               ),

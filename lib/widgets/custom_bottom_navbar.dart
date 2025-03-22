@@ -56,8 +56,6 @@ class CustomBottomNavBar extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.calculate), label: 'Calculator'),
         BottomNavigationBarItem(icon: Icon(Icons.dataset), label: 'Data Entry'),
         BottomNavigationBarItem(icon: Icon(Icons.imagesearch_roller), label: 'Image Builder'),
-        BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: ''),
-        BottomNavigationBarItem(icon: Icon(Icons.arrow_back), label: 'Back'),
       ],
     );
   }

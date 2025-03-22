@@ -26,6 +26,7 @@ class CalculatorScreen extends StatelessWidget {
         ),
         body: Column(
           children: [
+            // Display
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(20),
@@ -43,6 +44,8 @@ class CalculatorScreen extends StatelessWidget {
                 ),
               ),
             ),
+
+            // Button Area
             Expanded(
               flex: 2,
               child: TabBarView(
@@ -60,43 +63,82 @@ class CalculatorScreen extends StatelessWidget {
   }
 
   Widget _buildStandardButtons(BuildContext context) {
+    final calculator = Provider.of<CalculatorLogic>(context, listen: false);
+
+    final rows = [
+      ["C", "÷", "×", "⌫"],
+      ["7", "8", "9", "-"],
+      ["4", "5", "6", "+"],
+      ["1", "2", "3", "="],
+      ["0", ".", "(", ")"],
+    ];
+
     return Column(
-      children: [
-        _buildButtonRow(context, ["C", "÷", "×", "⌫"], Colors.orange),
-        _buildButtonRow(context, ["7", "8", "9", "-"], Colors.grey[800]!),
-        _buildButtonRow(context, ["4", "5", "6", "+"], Colors.grey[800]!),
-        _buildButtonRow(context, ["1", "2", "3", "="], Colors.blue),
-        _buildButtonRow(context, ["0", ".", "(", ")"], Colors.blue),
-      ],
+      children: rows.map((row) {
+        return Expanded(
+          child: Row(
+            children: row.map((text) {
+              Color bgColor;
+              if (["C", "÷", "×", "⌫", "="].contains(text)) {
+                bgColor = Colors.orange;
+              } else if (["0", "1", "2", "3", ".", "(", ")"].contains(text)) {
+                bgColor = Colors.blue;
+              } else {
+                bgColor = Colors.grey[800]!;
+              }
+
+              return Expanded(
+                child: CalculatorButton(
+                  text: text,
+                  color: bgColor,
+                  onPressed: () => calculator.addCharacter(text),
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      }).toList(),
     );
   }
 
   Widget _buildScientificButtons(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _buildButtonRow(context, ["sin(", "cos(", "tan(", "log("], Colors.purple),
-          _buildButtonRow(context, ["√(", "^", "e", "π"], Colors.purple),
-          _buildButtonRow(context, ["7", "8", "9", "÷"], Colors.grey[800]!),
-          _buildButtonRow(context, ["4", "5", "6", "×"], Colors.grey[800]!),
-          _buildButtonRow(context, ["1", "2", "3", "-"], Colors.grey[800]!),
-          _buildButtonRow(context, ["0", ".", "=", "C"], Colors.blue),
-          _buildButtonRow(context, ["(", ")"], Colors.grey[700]!),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildButtonRow(BuildContext context, List<String> buttons, Color color) {
     final calculator = Provider.of<CalculatorLogic>(context, listen: false);
-    return Row(
-      children: buttons.map((text) {
-        return CalculatorButton(
-          text: text,
-          color: text == "=" ? Colors.orange : color,
-          onPressed: () {
-            calculator.addCharacter(text);
-          },
+
+    final rows = [
+      ["sin(", "cos(", "tan(", "log("],
+      ["√(", "^", "e", "π"],
+      ["7", "8", "9", "÷"],
+      ["4", "5", "6", "×"],
+      ["1", "2", "3", "-"],
+      ["0", ".", "=", "C"],
+      ["(", ")"],
+    ];
+
+    return Column(
+      children: rows.map((row) {
+        return Expanded(
+          child: Row(
+            children: row.map((text) {
+              Color bgColor;
+              if (["sin(", "cos(", "tan(", "log(", "√(", "^", "e", "π"].contains(text)) {
+                bgColor = Colors.purple;
+              } else if (["=", "C"].contains(text)) {
+                bgColor = Colors.orange;
+              } else if (["(", ")", ".", "0", "1", "2", "3"].contains(text)) {
+                bgColor = Colors.blue;
+              } else {
+                bgColor = Colors.grey[800]!;
+              }
+
+              return Expanded(
+                child: CalculatorButton(
+                  text: text,
+                  color: bgColor,
+                  onPressed: () => calculator.addCharacter(text),
+                ),
+              );
+            }).toList(),
+          ),
         );
       }).toList(),
     );

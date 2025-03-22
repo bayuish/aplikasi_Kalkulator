@@ -6,25 +6,29 @@ class CalculatorButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const CalculatorButton({
+    super.key,
     required this.text,
     required this.color,
     required this.onPressed,
-    super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Container(
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.zero,
+      height: double.infinity,
+      width: double.infinity,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          padding: const EdgeInsets.all(22),
           backgroundColor: color,
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
         ),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+          style: const TextStyle(fontSize: 24, color: Colors.white),
         ),
       ),
     );
