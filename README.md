@@ -75,6 +75,8 @@ Saran, kritik, atau kontribusi sangat diterima!
 Bayu Lesmana
 Email: bayul769@gmail.com
 GitHub: @bayuish
+<img width="1440" alt="image" src="https://github.com/user-attachments/assets/a503bcd8-5211-4ca5-9312-2d6daf3929a3" />
+
 
 ---
 
