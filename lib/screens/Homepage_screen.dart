@@ -12,6 +12,25 @@ class HomepageScreen extends StatefulWidget {
 class _HomepageScreenState extends State<HomepageScreen> {
   String? avatarUrl;
   String? userName;
+  int selectedIndex = 0;
+
+  final List<Map<String, String>> products = [
+    {
+      'image': 'assets/dual_sense.png',
+      'title': 'Smart Kalkulator',
+      'subtitle': 'Kalkulator Standar & Ilmiah modern',
+    },
+    {
+      'image': 'assets/compu.png',
+      'title': 'Data Entry',
+      'subtitle': 'Input & kelola data mahasiswa',
+    },
+    {
+      'image': 'assets/searchim.png',
+      'title': 'Image View',
+      'subtitle': 'Tampilkan gambar dari URL dinamis',
+    },
+  ];
 
   @override
   void initState() {
@@ -35,8 +54,16 @@ class _HomepageScreenState extends State<HomepageScreen> {
     }
   }
 
+  void _onIconTap(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selected = products[selectedIndex];
+
     return Scaffold(
       backgroundColor: const Color(0xFFE8F0FA),
       body: Stack(
@@ -62,7 +89,6 @@ class _HomepageScreenState extends State<HomepageScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header Row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -91,44 +117,25 @@ class _HomepageScreenState extends State<HomepageScreen> {
                   const Text("Products", style: TextStyle(fontSize: 26, fontWeight: FontWeight.w300)),
                   const SizedBox(height: 20),
 
-                  // Category Icons
                   Row(
                     children: [
-                      _categoryIcon(Icons.calculate_rounded, active: true),
+                      _categoryIcon(Icons.calculate_rounded, 0),
                       const SizedBox(width: 12),
-                      _categoryIcon(Icons.school),
+                      _categoryIcon(Icons.school, 1),
                       const SizedBox(width: 12),
-                      _categoryIcon(Icons.image_search),
+                      _categoryIcon(Icons.image_search, 2),
                     ],
                   ),
                   const SizedBox(height: 30),
 
-                  // Product Card
-                  Expanded(
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        _productCard(
-                          image: './assets/dual_sense.png'
-                              '',
-                          title: 'Dual Sense',
-                          subtitle: 'Official PS5 controller',
-                        ),
-                        _productCard(
-                          image: 'assets/dual_sense_blue.png',
-                          title: 'Dual Sense',
-                          subtitle: 'Blue version',
-                        ),
-                      ],
-                    ),
-                  ),
+                  Center(child: _productCard(selected)),
                 ],
               ),
             ),
           ),
         ],
       ),
-      bottomNavigationBar: const CustomBottomNavBar(),
+      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 0),
     );
   }
 
@@ -137,9 +144,7 @@ class _HomepageScreenState extends State<HomepageScreen> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 8),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
       ),
       padding: const EdgeInsets.all(12),
       child: Icon(icon, size: 24),
@@ -156,47 +161,48 @@ class _HomepageScreenState extends State<HomepageScreen> {
       padding: const EdgeInsets.all(2),
       child: CircleAvatar(
         radius: 20,
-        backgroundImage:
-        avatarUrl != null ? NetworkImage(avatarUrl!) : null,
+        backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl!) : null,
         backgroundColor: Colors.grey[300],
         child: avatarUrl == null ? const Icon(Icons.person, color: Colors.white) : null,
       ),
     );
   }
 
-  Widget _categoryIcon(IconData icon, {bool active = false}) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: active ? Colors.black : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 4),
-        ],
+  Widget _categoryIcon(IconData icon, int index) {
+    final isSelected = selectedIndex == index;
+    return GestureDetector(
+      onTap: () => _onIconTap(index),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        ),
+        child: Icon(icon, color: isSelected ? Colors.white : Colors.black, size: 28),
       ),
-      child: Icon(icon, color: active ? Colors.white : Colors.black, size: 28),
     );
   }
 
-  Widget _productCard({required String image, required String title, required String subtitle}) {
+  Widget _productCard(Map<String, String> data) {
     return Container(
-      width: 200,
-      margin: const EdgeInsets.only(right: 20),
+      width: 220,
+      height: 340,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 12, offset: Offset(0, 6))],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: Image.asset(image, fit: BoxFit.contain),
+            child: Image.asset(data['image']!, fit: BoxFit.contain),
           ),
           const SizedBox(height: 12),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          Text(subtitle, style: const TextStyle(color: Colors.black54)),
+          Text(data['title']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          Text(data['subtitle']!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54)),
         ],
       ),
     );

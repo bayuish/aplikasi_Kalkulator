@@ -32,3 +32,6 @@ flutter:
   # Tambahkan bagian assets dengan benar
   assets:
     - assets/profile.png
+    - assets/dual_sense.png
+    - assets/compu.png
+    - assets/searchim.png
