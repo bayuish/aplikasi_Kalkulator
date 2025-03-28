@@ -1,3 +1,4 @@
+import 'package:aplikasikalkulator/screens/homepage_screen.dart';
 import 'package:aplikasikalkulator/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -23,14 +24,24 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoginPage(),
+      home: _checkSession(),
     );
+  }
+
+  Widget _checkSession() {
+    final session = Supabase.instance.client.auth.currentSession;
+    return session != null ? const HomepageScreen() : const LoginPage();
   }
 }

@@ -5,7 +5,7 @@ class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
 
   @override
-  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
+  _ResetPasswordScreenState createState() => _ResetPasswordScreenState();
 }
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
@@ -17,7 +17,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email wajib diisi!")),
+        const SnackBar(content: Text("Email wajib diisi")),
       );
       return;
     }
@@ -25,30 +25,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Cek apakah email terdaftar di tabel `profiles`
-      final response = await Supabase.instance.client
-          .from('profiles')
-          .select('email')
-          .eq('email', email)
-          .maybeSingle();
-
-      if (response == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Email tidak terdaftar!")),
-        );
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      // Jika email ditemukan, lanjut kirim link reset
       await Supabase.instance.client.auth.resetPasswordForEmail(email);
-
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Link reset telah dikirim ke email kamu.")),
+        const SnackBar(content: Text("Cek email untuk reset password")),
       );
+      Navigator.pop(context); // Kembali ke halaman login
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Gagal reset password: ${e.toString()}")),
+        SnackBar(content: Text("Error: ${e.toString()}")),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -57,71 +41,49 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryBlue = const Color(0xFF256DFF);
-    final Color backgroundColor = const Color(0xFFE8F0FA);
-
     return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        backgroundColor: primaryBlue,
-        title: const Text("Reset Password", style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text("Reset Password")),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.lock_reset, size: 64, color: Color(0xFF256DFF)),
-                const SizedBox(height: 20),
-                const Text(
-                  "Lupa Password?",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  "Masukkan email kamu dan kami akan kirimkan link untuk reset password.",
-                  style: TextStyle(fontSize: 16, color: Colors.black54),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 30),
-                TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    labelText: "Email",
-                    prefixIcon: const Icon(Icons.email),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _resetPassword,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryBlue,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                      "Kirim Link Reset",
-                      style: TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Masukkan email Anda untuk mengatur ulang kata sandi.",
+              style: TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
             ),
-          ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: "Email",
+                prefixIcon: const Icon(Icons.email),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _resetPassword,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                  "Kirim Email Reset",
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
