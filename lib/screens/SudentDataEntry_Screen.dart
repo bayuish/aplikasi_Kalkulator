@@ -1,5 +1,11 @@
+import 'dart:io' as io;
+import 'dart:html' as html;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:csv/csv.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import '../widgets/custom_bottom_navbar.dart';
 
 class StudentDataEntryScreen extends StatefulWidget {
@@ -21,12 +27,30 @@ class _StudentDataEntryScreenState extends State<StudentDataEntryScreen> {
   final List<String> _matkulOptions = ['Mobile App', 'Python'];
 
   bool _showSuccess = false;
+  bool _isPremium = false;
   List<Map<String, dynamic>> _studentList = [];
 
   @override
   void initState() {
     super.initState();
     _fetchData();
+    _checkRole();
+  }
+
+  Future<void> _checkRole() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+
+    final profile = await Supabase.instance.client
+        .from('profiles')
+        .select('user_type')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    final role = profile?['user_type'];
+    if (role == 'Premium User' || role == 'Admin') {
+      setState(() => _isPremium = true);
+    }
   }
 
   Future<void> _submitData() async {
@@ -38,6 +62,13 @@ class _StudentDataEntryScreenState extends State<StudentDataEntryScreen> {
     }
 
     final nim = int.tryParse(_nimController.text.trim());
+    if (nim == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('NIM tidak valid!')),
+      );
+      return;
+    }
+
     final existing = await Supabase.instance.client
         .from('students')
         .select()
@@ -106,11 +137,11 @@ class _StudentDataEntryScreenState extends State<StudentDataEntryScreen> {
     showDialog(
       context: context,
       builder: (_) {
-        final _editNilaiController = TextEditingController(text: student['nilai'].toString());
+        final editNilaiController = TextEditingController(text: student['nilai'].toString());
         return AlertDialog(
           title: const Text("Edit / Hapus Data"),
           content: TextFormField(
-            controller: _editNilaiController,
+            controller: editNilaiController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: "Nilai Baru"),
           ),
@@ -119,35 +150,25 @@ class _StudentDataEntryScreenState extends State<StudentDataEntryScreen> {
               onPressed: () => Navigator.pop(context),
               child: const Text("Batal"),
             ),
-
-            // Tombol Hapus
-            TextButton(
-              onPressed: () async {
-                // Hapus data dari Supabase berdasarkan NIM
-                await Supabase.instance.client
-                    .from('students')
-                    .delete()
-                    .eq('nim', student['nim']);
-
-                // Tutup dialog setelah delete
-                Navigator.pop(context);
-
-                // Refresh data
-                await _fetchData();
-
-                // Notifikasi
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Data berhasil dihapus!")),
-                );
-              },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text("Hapus"),
-            ),
-
-            // Tombol Simpan Edit
+            if (_isPremium)
+              TextButton(
+                onPressed: () async {
+                  await Supabase.instance.client
+                      .from('students')
+                      .delete()
+                      .eq('nim', student['nim']);
+                  Navigator.pop(context);
+                  await _fetchData();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Data berhasil dihapus!")),
+                  );
+                },
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text("Hapus"),
+              ),
             ElevatedButton(
               onPressed: () async {
-                final updatedNilai = int.tryParse(_editNilaiController.text);
+                final updatedNilai = int.tryParse(editNilaiController.text);
                 if (updatedNilai != null) {
                   await Supabase.instance.client
                       .from('students')
@@ -168,6 +189,30 @@ class _StudentDataEntryScreenState extends State<StudentDataEntryScreen> {
     );
   }
 
+  Future<void> _exportCSV() async {
+    List<List<dynamic>> rows = [
+      ['Nama', 'NIM', 'Kelas', 'Mata Kuliah', 'Nilai'],
+      ..._studentList.map((s) => [s['nama'], s['nim'], s['kelas'], s['mata_kuliah'], s['nilai']]),
+    ];
+
+    String csvData = const ListToCsvConverter().convert(rows);
+
+    if (kIsWeb) {
+      final bytes = html.Blob([csvData]);
+      final url = html.Url.createObjectUrlFromBlob(bytes);
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute('download', 'data_mahasiswa.csv')
+        ..click();
+      html.Url.revokeObjectUrl(url);
+    } else {
+      final directory = await getTemporaryDirectory();
+      final path = '${directory.path}/data_mahasiswa.csv';
+      final file = io.File(path);
+      await file.writeAsString(csvData);
+      await Share.shareXFiles([XFile(path)], text: 'Export Data Mahasiswa');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -175,6 +220,13 @@ class _StudentDataEntryScreenState extends State<StudentDataEntryScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF256DFF),
         title: const Text("Entry Data Mahasiswa"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: "Export CSV",
+            onPressed: _studentList.isEmpty ? null : _exportCSV,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

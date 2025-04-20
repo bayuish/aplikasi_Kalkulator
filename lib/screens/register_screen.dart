@@ -76,6 +76,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'name': name,
         'email': email,
         'avatar_url': imageUrl,
+        'user_type': 'Free User',
+        'upgrade_status': 'none',
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -96,10 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final avatarPreview = _imageBytes != null
-        ? CircleAvatar(
-      radius: 50,
-      backgroundImage: MemoryImage(_imageBytes!),
-    )
+        ? CircleAvatar(radius: 50, backgroundImage: MemoryImage(_imageBytes!))
         : const CircleAvatar(
       radius: 50,
       backgroundColor: Colors.white,

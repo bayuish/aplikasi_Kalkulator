@@ -3,7 +3,7 @@ import '../screens/Homepage_screen.dart';
 import '../screens/SudentDataEntry_Screen.dart';
 import '../screens/calculator_screen.dart';
 import '../screens/imagebuilder_screen.dart';
-
+import '../screens/UploadScreen.dart';
 
 
 class CustomBottomNavBar extends StatelessWidget {
@@ -38,6 +38,14 @@ class CustomBottomNavBar extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const ImageBuilderScreen()),
         );
         break;
+
+      case 4:
+      // TODO: Ganti dengan halaman Upload yang kamu buat
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const UploadScreen()),
+        );
+        break;
     // Kamu bisa lanjutkan untuk case index 3-5 nanti.
     }
   }
@@ -56,6 +64,7 @@ class CustomBottomNavBar extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.calculate), label: 'Calculator'),
         BottomNavigationBarItem(icon: Icon(Icons.dataset), label: 'Data Entry'),
         BottomNavigationBarItem(icon: Icon(Icons.imagesearch_roller), label: 'Image Builder'),
+        BottomNavigationBarItem(icon: Icon(Icons.upload_file), label: 'Upload'),
       ],
     );
   }

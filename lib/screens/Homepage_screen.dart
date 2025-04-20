@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/custom_bottom_navbar.dart';
+import 'admin_upgrade_screen.dart';
 import 'login_screen.dart';
+import 'profile_screen.dart';
 
 class HomepageScreen extends StatefulWidget {
   const HomepageScreen({super.key});
@@ -14,6 +16,7 @@ class _HomepageScreenState extends State<HomepageScreen> {
   String? avatarUrl;
   String? userName;
   String? userEmail;
+  String? userType;
   int selectedIndex = 0;
 
   final List<Map<String, String>> products = [
@@ -37,23 +40,38 @@ class _HomepageScreenState extends State<HomepageScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUserProfile();
+    Future.delayed(Duration.zero, _loadUserProfile);
   }
 
   Future<void> _loadUserProfile() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
-      final response = await Supabase.instance.client
-          .from('profiles')
-          .select('avatar_url, name, email')
-          .eq('id', user.id)
-          .single();
+      try {
+        final response = await Supabase.instance.client
+            .from('profiles')
+            .select('avatar_url, name, email, user_type')
+            .eq('id', user.id)
+            .maybeSingle();
 
-      setState(() {
-        avatarUrl = response['avatar_url'] as String?;
-        userName = response['name'] as String?;
-        userEmail = response['email'] as String?;
-      });
+        if (response == null) {
+          print("⚠️ Gagal memuat profil: response null");
+          return;
+        }
+
+        setState(() {
+          avatarUrl = response['avatar_url'] as String?;
+          userName = response['name'] as String?;
+          userEmail = response['email'] as String?;
+          userType = response['user_type'] as String?;
+        });
+
+        print("✅ Profil berhasil dimuat: ${response['name']} (${response['user_type']})");
+
+      } catch (e) {
+        print("❌ Error saat fetch profile: $e");
+      }
+    } else {
+      print("⚠️ User tidak login.");
     }
   }
 
@@ -96,6 +114,36 @@ class _HomepageScreenState extends State<HomepageScreen> {
               ),
               decoration: const BoxDecoration(color: Color(0xFF256DFF)),
             ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text("Profile"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text("Settings"),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Settings clicked")));
+              },
+            ),
+            if (userType == 'Admin')
+              ListTile(
+                leading: const Icon(Icons.admin_panel_settings),
+                title: const Text("Admin Panel"),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AdminUpgradeScreen()),
+                  );
+                },
+              ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text("Sign Out"),
